@@ -1,0 +1,283 @@
+https://www.yogihosting.com/aspnet-core-identity-roles/
+https://www.youtube.com/watch?v=egITMrwMOPU
+https://code-maze.com/authentication-aspnet-core-identity/
+
+Packages 
+a. Microsoft.AspNetCore.Identity.EntityFrameworkCore
+
+b. Microsoft.EntityFrameworkCore.SqlServer
+
+c. Microsoft.AspNetCore.Identity.UI
+
+d. Microsoft.EntityFrameworkCore.Tools
+
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
+
+namespace ASPNETCoreIdentityDemo.Models
+{
+    public class ApplicationDbContext : IdentityDbContext
+    {
+        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
+            : base(options)
+        {
+        }
+    }
+}
+
+Add Services to IdentityDbContext
+
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseSqlServer(connectionString));
+builder.Services.AddDefaultIdentity<IdentityUser>(options =>
+{}).AddRoles<IdentityRole>().AddEntityFrameworkStores<AppDbContext>();
+
+builder.Services.AddIdentity<IdentityUser, IdentityRole>()
+                    .AddEntityFrameworkStores<ApplicationDbContext>();
+
+
+builder.Services.AddDefaultIdentity<IdentityUser>(options =>
+{
+    // Below is for Password settings
+    options.Password.RequireDigit = true;
+    options.Password.RequiredLength = 8;
+    options.Password.RequireNonAlphanumeric = true;
+    options.Password.RequireUppercase = true;
+    options.Password.RequireLowercase = true;
+    options.Password.RequiredUniqueChars = 1;
+    options.SignIn.RequireConfirmedAccount = true;
+    //options.SignIn.RequireConfirmedEmail = true;
+    //Ends here for password settings
+}).AddRoles<IdentityRole>().AddEntityFrameworkStores<AppDbContext>();
+
+3. Add Authentication middleware 
+
+4. Register New User with Identity 
+
+Create Model 
+
+using System.ComponentModel.DataAnnotations;
+namespace ASPNETCoreIdentityDemo.Models
+{
+    public class RegisterViewModel
+    {
+        [Required]
+        [EmailAddress]
+        public string Email { get; set; }
+
+        [Required]
+        [DataType(DataType.Password)]
+        public string Password { get; set; }
+
+        [DataType(DataType.Password)]
+        [Display(Name = "Confirm password")]
+        [Compare("Password", ErrorMessage = "Password and confirmation password do not match.")]
+        public string ConfirmPassword { get; set; }
+    }
+}
+
+UserManager and SignInManager services
+
+using ASPNETCoreIdentityDemo.Models;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+
+namespace ASPNETCoreIdentityDemo.Controllers
+{
+    public class AccountController : Controller
+    {
+        //userManager will hold the UserManager instance
+        private readonly UserManager<IdentityUser> userManager;
+
+        //signInManager will hold the SignInManager instance
+        private readonly SignInManager<IdentityUser> signInManager;
+
+        //Both UserManager and SignInManager services are injected into the AccountController
+        //using constructor injection
+        public AccountController(UserManager<IdentityUser> userManager,
+            SignInManager<IdentityUser> signInManager)
+        {
+            this.userManager = userManager;
+            this.signInManager = signInManager;
+        }
+
+        [HttpGet]
+        public IActionResult Register()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Register(RegisterViewModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                // Copy data from RegisterViewModel to IdentityUser
+                var user = new IdentityUser
+                {
+                    UserName = model.Email,
+                    Email = model.Email
+                };
+
+                // Store user data in AspNetUsers database table
+                var result = await userManager.CreateAsync(user, model.Password);
+
+                // If user is successfully created, sign-in the user using
+                // SignInManager and redirect to index action of HomeController
+                if (result.Succeeded)
+                {
+                    await signInManager.SignInAsync(user, isPersistent: false);
+                    return RedirectToAction("index", "home");
+                }
+
+                // If there are any errors, add them to the ModelState object
+                // which will be displayed by the validation summary tag helper
+                foreach (var error in result.Errors)
+                {
+                    ModelState.AddModelError(string.Empty, error.Description);
+                }
+            }
+
+            return View(model);
+        }
+    }
+}
+
+LOGIN LOGOUT
+
+using System.ComponentModel.DataAnnotations;
+namespace ASPNETCoreIdentityDemo.Models
+{
+    public class LoginViewModel
+    {
+        [Required]
+        [EmailAddress]
+        public string Email { get; set; }
+
+        [Required]
+        [DataType(DataType.Password)]
+        public string Password { get; set; }
+
+        [Display(Name = "Remember Me")]
+        public bool RememberMe { get; set; }
+    }
+}
+
+[HttpGet]
+public IActionResult Login()
+{
+    return View();
+}
+[HttpPost]
+[AllowAnonymous]
+public async Task<IActionResult> Login(LoginViewModel model)
+{
+    if (ModelState.IsValid)
+    {
+        var result = await signInManager.PasswordSignInAsync(model.Email, model.Password, model.RememberMe, lockoutOnFailure: false);
+
+        if (result.Succeeded)
+        {
+            // Handle successful login
+            return RedirectToAction(nameof(HomeController.Index), "Home");
+        }
+        if (result.RequiresTwoFactor)
+        {
+            // Handle two-factor authentication case
+        }
+        if (result.IsLockedOut)
+        {
+            // Handle lockout scenario
+        }
+        else
+        {
+            // Handle failure
+            ModelState.AddModelError(string.Empty, "Invalid login attempt.");
+            return View(model);
+        }
+    }
+logout
+
+@using Microsoft.AspNetCore.Identity
+@inject SignInManager<IdentityUser> SignInManager
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - ASPNETCoreIdentityDemo</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/ASPNETCoreIdentityDemo.styles.css" asp-append-version="true" />
+</head>
+<body>
+    <header>
+        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
+            <div class="container-fluid">
+                <a class="navbar-brand" asp-controller="Home" asp-action="Index">ASPNETCoreIdentityDemo</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
+                        aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
+                    <ul class="navbar-nav flex-grow-1">
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-controller="Home" asp-action="Index">Home</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-controller="Home" asp-action="Privacy">Privacy</a>
+                        </li>
+                    </ul>
+                    <ul class="navbar-nav ml-auto">
+                        @*If the user is signed-in display Logout link*@
+                        @if (SignInManager.IsSignedIn(User))
+                        {
+                            <li class="nav-item">
+                                <form method="post" asp-controller="account" asp-action="logout">
+                                    <button type="submit" style="width:auto"
+                                            class="nav-link btn btn-link py-0">
+                                        Logout @User?.Identity?.Name
+                                    </button>
+                                </form>
+                            </li>
+                        }
+                        else
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="account" asp-action="register">
+                                    Register
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="account" asp-action="login">
+                                    Login
+                                </a>
+                            </li>
+                        }
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+    <div class="container">
+        <main role="main" class="pb-3">
+            @RenderBody()
+        </main>
+    </div>
+
+    <footer class="border-top footer text-muted">
+        <div class="container">
+            &copy; 2023 - ASPNETCoreIdentityDemo - <a asp-controller="Home" asp-action="Privacy">Privacy</a>
+        </div>
+    </footer>
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>
+    // If we got this far, something failed, redisplay form
+    return View(model);
+}
