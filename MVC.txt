@@ -1,0 +1,102 @@
+Server=localhost;Database=master;Trusted_Connection=True;
+https://learn.microsoft.com/en-us/ssms/download-sql-server-management-studio-ssms?redirectedfrom=MSDN#download-ssms
+https://www.microsoft.com/en-in/sql-server/sql-server-downloads
+Kevin Dockx
+Unit Testing an ASP.NET Core MVC Web Application
+https://app.pluralsight.com/library/courses/architecting-aspnet-core-mvc-unit-testability/table-of-contents
+https://app.pluralsight.com/library/courses/asp-dot-net-core-6-mvc-web-application-unit-testing/table-of-contents
+
+GitHub Foundations: GitHub Project Management
+by Gill Cleeren
+https://app.pluralsight.com/library/courses/github-foundations-github-project-management/table-of-contents
+GitHub Foundations: Collaborating on GitHub
+https://app.pluralsight.com/library/courses/github-foundations-collaborating-github/table-of-contents
+https://app.pluralsight.com/library/courses/github-foundations-git-github/table-of-contents
+https://app.pluralsight.com/library/courses/fundamentals-github/table-of-contents
+https://app.pluralsight.com/library/courses/git-branching-merging/table-of-contents
+https://app.pluralsight.com/library/courses/git-debugging-techniques/table-of-contents
+
+GIT VS
+
+https://app.pluralsight.com/library/courses/visual-studio-2022-working-git-github/table-of-contents
+Working with Git and GitHub in Visual Studio 2022
+
+Using Git for Source Control in Visual Studio 2019
+by Thomas Claudius Huber
+
+Working with Git Branches
+by Craig Golightly
+
+https://app.pluralsight.com/library/courses/dotnet-core-mvc-apps-extensions/table-of-contents
+middleware
+https://app.pluralsight.com/library/courses/asp-dot-net-core-6-extending/table-of-contents
+
+https://app.pluralsight.com/library/courses/asp-dot-net-core-6-web-api-debugging-error-handling/table-of-contents
+
+https://deloittedevelopment.udemy.com/course/asp-net-core-true-ultimate-guide-real-project/learn/lecture/34514714#overview
+
+identity core
+
+https://deloittedevelopment.udemy.com/course/complete-ecommerce-aspnet-mvc-application/learn/lecture/28813530#overview
+
+https://deloittedevelopment.udemy.com/course/the-complete-guide-to-aspnet-web-api/
+
+Ervis Trupja
+
+https://deloittedevelopment.udemy.com/course/complete-aspnet-core-31-and-entity-framework-development/
+
+https://deloittedevelopment.udemy.com/course/complete-aspnet-core-21-course/
+
+https://app.pluralsight.com/library/courses/securely-handling-errors-logging-events-aspdotnet-aspdotnet-core/table-of-contents
+
+UID:usidtafaculty@deloitte.com
+
+PWD:Su$500083TS
+
+https://www.syncfusion.com/blogs/post/global-exception-handling-net-6 ----
+
+UseStatusCodePagesWithRedirects
+UseStatusCodePagesWithReExecute
+https://andrewlock.net/re-execute-the-middleware-pipeline-with-the-statuscodepages-middleware-to-create-custom-error-pages/
+
+using Microsoft.AspNetCore.Mvc;
+namespace NonSucessHTTPStatusCodeDemo.Controllers
+{
+    public class ErrorController : Controller
+    {
+        // Route to capture any error status code from the URL
+        [Route("Error/{statusCode}")]
+        public IActionResult Index(int statusCode)
+        {
+            // Clear any pre-existing response content
+            Response.Clear();
+
+            // Explicitly set the response status code
+            Response.StatusCode = statusCode;
+
+            // Render the appropriate error view based on the status code
+            switch (statusCode)
+            {
+                case 401:
+                    return View("UnauthorizedError");        // For Unauthorized Access
+                case 403:
+                    return View("ForbiddenError");           // For Forbidden Access 
+                case 404:
+                    return View("PageNotFoundError");        // For Not Found errors
+                case 500:
+                    return View("InternalServerError");      // For Internal Server errors
+                case 503:
+                    return View("ServiceUnavailableError");  // For Service Unavailable 
+                default:
+                    return View("GenericError");             // For any other error codes
+            }
+        }
+    }
+}
+
+ https://www.emmet-gray.com/Articles/DataRelations.html
+https://www.ezzylearning.net/tutorial/navigate-master-details-tables-in-dataset-using-datarelation
+https://learn.microsoft.com/en-us/dotnet/framework/data/adonet/dataset-datatable-dataview/adding-datarelations
+https://owlcation.com/stem/Establish-DataTable-Relation-using-C-Adonet-DataRelation-with-Example
+https://www.ezzylearning.net/tutorial/navigate-master-details-tables-in-dataset-using-datarelation
+
